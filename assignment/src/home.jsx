@@ -8,12 +8,15 @@ import { FaTrash } from "react-icons/fa";
 import { LiaSortUpSolid,LiaSortDownSolid } from "react-icons/lia";
 import { CiSearch } from "react-icons/ci";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // const handleChange(form_data){
   
 // }
 
 function Home() {
+  const navigate=useNavigate();
+
   axios.defaults.withCredentials = true
   const [isUpdated,setisUpdated]=useState(false)
 
@@ -36,7 +39,7 @@ function Home() {
       console.log("cleaned:",data)
       setUsers(data)
       setfilterCompanyData(data)
-      updateFilter()
+      // updateFilter()
       
     }).catch(function(error){
       console.log(error)
@@ -47,6 +50,7 @@ function Home() {
   function handleLogout(){
     axios.delete("http://localhost:3000/api/auth/logout").then(
       function(response){
+        navigate('/login')
         console.log(response)
       }
     ).catch( function (response){
@@ -86,6 +90,14 @@ function Home() {
   const [selectedCompanies, setselectedCompanies] = useState([]);
   // const [companyLocationMap,setcompanyLocationMap]=useState([])
 
+
+  useEffect(()=>{
+    if(filterCompanyData.length>0){
+      updateFilter() 
+    }
+  },[filterCompanyData])
+
+
   function handleSort(sortkey,sortstate,sortStatefunction){
       let sortedData=[...filterCompanyData].sort((a,b)=>{
         console.log(a[sortkey])
@@ -107,24 +119,37 @@ function Home() {
 
 
   function handleSelect(e) {
-    const { checked, value } = e.target;
-    let updatedSelected;
-    if (checked) {
-      updatedSelected = [...selectedCompanies, value];
-      // setselectedCompanies(updatedSelected)
-      // console.log()
-      // setfilterCompanyData(user_data.filter((data)=>{
-      //   return selectedCompanies.includes(data.CompanyName)
-      // }))
-    } else {
-      // setfilterCompanyData(()=>[...user_data])
-      updatedSelected = selectedCompanies.filter(
-        (company) => company !== value
-      );
-      // setselectedCompanies(updatedSelected)
-    }
-    setselectedCompanies(updatedSelected);
-    applyfilter(updatedSelected,selectedLocation);
+    const { value } = e.target;
+    // let updatedSelected;
+    setselectedCompanies((prev)=>{
+      if(prev.includes(value)){
+        return prev.filter(c=>{
+          value!==c
+        })
+      }
+      else{
+        return [...prev,value]
+      }
+    })
+    // if (checked) {
+    //   updatedSelected = [...selectedCompanies, value];
+    //   console.log("upd-sele",updatedSelected)
+    //   // setselectedCompanies(updatedSelected)
+    //   // console.log()
+    //   // setfilterCompanyData(user_data.filter((data)=>{
+    //   //   return selectedCompanies.includes(data.CompanyName)
+    //   // }))
+    // } else {
+    //   // setfilterCompanyData(()=>[...user_data])
+    //   updatedSelected = selectedCompanies.filter(
+    //     (company) => String(company) !== String(value)
+    //   );
+    //   // setselectedCompanies(updatedSelected)
+    // }
+    // console.log("ff",updatedSelected)
+    // setselectedCompanies(updatedSelected);
+    applyfilter(selectedCompanies,selectedLocation);
+    
     // const f_data=user_data.filter((data)=>{
     //     updatedSelected.includes(data.CompanyName)
     //   })
@@ -132,11 +157,19 @@ function Home() {
   }
   function applyfilter(companies,locations) {
     const f_data = user_data.filter((data) => {
-     const company =companies.length ===0 ||companies.includes(data.CompanyName);
+     const company =companies.length ===0 ||companies.includes(String(data.CompanyName));
      const location=locations.length ===0 || locations.includes(data.Location);
+     console.log("Sample user_data", user_data[0]);
+
+
+     
      return company && location;
     });
+    console.log("Companies filter:", companies);
+console.log("Locations filter:", locations);
+console.log("fdata",f_data)
     setfilterCompanyData(f_data);
+    
   }
 
   function handleLocFilter(e) {
@@ -152,8 +185,9 @@ function Home() {
       );
       // setselectedLocation(updatedSelected)
     }
-    applyfilter(selectedCompanies,updatedSelected);
+    
     setselectedLocation(updatedSelected);
+    applyfilter(selectedCompanies,updatedSelected);
   }
 
   // function handle_filter() {
@@ -371,15 +405,15 @@ Add User
 
           <ul className="dropdown-menu">
             <p className="text-center">Companies</p>
-            {uniqueCompanies.map((ele, index) => (
+            {uniqueCompanies.map((ele) => (
               <>
-                <li key={index} className="dropdown-item">
+                <li key={ele} className="dropdown-item">
                   <label htmlFor="form-select">{ele}</label>
                   <input
                     type="checkbox"
                     value={ele}
                     name="filter_data"
-                    checked={selectedCompanies.includes(ele)}
+                    checked={selectedCompanies.includes(String(ele))}
                     onChange={handleSelect}
                     className="form-group"
                   />
