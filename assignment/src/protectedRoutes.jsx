@@ -24,13 +24,13 @@ const ProtectedRoutes=()=>{
 
             })
         } 
-        checkAuth()
+        setTimeout(checkAuth(),1000)
     },[])
     if(authState===null){
         return <><BeatLoader cssOverride={{
             "display": "flex",
-            "justify-content": "center",
-            "align-items": "center",
+            "justifyContent": "center",
+            "alignItems": "center",
             "height": "100vh"
           }}/></>
     }

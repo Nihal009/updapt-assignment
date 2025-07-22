@@ -1,9 +1,9 @@
 // import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import "./App.css";
-import instance from "../axiosUrl";
+// import instance from "../axiosUrl";
 import axios from "axios";
 
 

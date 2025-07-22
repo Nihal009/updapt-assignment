@@ -9,7 +9,7 @@ import { LiaSortUpSolid,LiaSortDownSolid } from "react-icons/lia";
 import { CiSearch } from "react-icons/ci";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { HiOutlineLogout } from "react-icons/hi";
 // const handleChange(form_data){
   
 // }
@@ -82,7 +82,7 @@ function Home() {
 
   const [CompanySortState,setCompanySortState]=useState(true)
   const [LocationSortState,setLocationSortState]=useState(true)
-
+  const [stateBeforeSearch,setstateBeforeSearch]=useState()
 
 
 
@@ -105,10 +105,10 @@ function Home() {
         let valueA=a[sortkey];
         let valueB=b[sortkey];
         if(sortstate){
-          return valueA.localeCompare(valueB);
+          return String(valueA).localeCompare(String(valueB));
         }
         else{
-          return valueB.localeCompare(valueA);
+          return String(valueB).localeCompare(String(valueA));
         }
       }
       );
@@ -121,52 +121,38 @@ function Home() {
 
   function handleSelect(e) {
     const { value } = e.target;
-    // let updatedSelected;
+    let updatedSelected;
+    // console.log(value)
     setselectedCompanies((prev)=>{
       if(prev.includes(value)){
-        return prev.filter(c=>{
+        // console.log("prevv",prev.includes(value))
+        updatedSelected= prev.filter(c=>{
+          // console.log("c",c)
           value!==c
         })
       }
       else{
-        return [...prev,value]
+        // console.log([...prev,value])
+       
+        updatedSelected= [...prev,value]
       }
+      applyfilter(updatedSelected,selectedLocation);
+      return updatedSelected
     })
-    // if (checked) {
-    //   updatedSelected = [...selectedCompanies, value];
-    //   console.log("upd-sele",updatedSelected)
-    //   // setselectedCompanies(updatedSelected)
-    //   // console.log()
-    //   // setfilterCompanyData(user_data.filter((data)=>{
-    //   //   return selectedCompanies.includes(data.CompanyName)
-    //   // }))
-    // } else {
-    //   // setfilterCompanyData(()=>[...user_data])
-    //   updatedSelected = selectedCompanies.filter(
-    //     (company) => String(company) !== String(value)
-    //   );
-    //   // setselectedCompanies(updatedSelected)
-    // }
-    // console.log("ff",updatedSelected)
-    // setselectedCompanies(updatedSelected);
-    applyfilter(selectedCompanies,selectedLocation);
+    // console.log("s-c",selectedCompanies)
     
-    // const f_data=user_data.filter((data)=>{
-    //     updatedSelected.includes(data.CompanyName)
-    //   })
-    //   setfilterCompanyData(f_data)
+    
+   
   }
   function applyfilter(companies,locations) {
+    console.log("Companies filter:", companies);
     const f_data = user_data.filter((data) => {
      const company =companies.length ===0 ||companies.includes(String(data.CompanyName));
      const location=locations.length ===0 || locations.includes(data.Location);
-     console.log("Sample user_data", user_data[0]);
-
-
-     
+    
      return company && location;
     });
-    console.log("Companies filter:", companies);
+    
 console.log("Locations filter:", locations);
 console.log("fdata",f_data)
     setfilterCompanyData(f_data);
@@ -217,15 +203,7 @@ console.log("fdata",f_data)
     }
   }
 
-  // const Search_result = user_data.filter((user) => {
-  //   return (
-  //     user.CompanyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     user.Location.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
-  // });
-  // console.log("Search_result", Search_result);
-
-  // });
+  // ;
 
   //checkbox data handler
   // function handleCompanyCheckboxChange(e){
@@ -257,7 +235,33 @@ console.log("fdata",f_data)
 
   //search handler
   function handleSearch(e) {
-    setSearchterm(e.target.value);
+    const curr_value=e.target.value
+
+    setSearchterm(curr_value);
+    
+    // setstateBeforeSearch([...filterCompanyData])
+    if(curr_value===""){
+      console.log("empty")
+      setfilterCompanyData([...stateBeforeSearch])
+
+    }
+    else{
+      if(searchTerm===""){
+        setstateBeforeSearch([...filterCompanyData])
+      }
+
+      console.log(curr_value)
+      const Search_result = filterCompanyData.filter((user) => {
+        
+          return (
+            String(user.CompanyName)===String(curr_value) ||
+            user.Location.toLowerCase().includes(curr_value.toLowerCase())
+          );
+        });
+        console.log("Search_result", Search_result);
+        setfilterCompanyData(Search_result)
+        
+    }
   }
   // const sortedUsers=[...user_data].sort(()=>{})
   // console.log(user_data)
@@ -311,7 +315,7 @@ console.log("fdata",f_data)
     ...new Set(filterCompanyData.map((user) => user.CompanyName)),
   ];
   const LocationMap = {};
-
+  console.log("filter_ele",filter_ele)
   filter_ele.forEach((company) => {
     LocationMap[company] = [
       ...new Set(
@@ -328,32 +332,7 @@ console.log("fdata",f_data)
       
       setcompLocationData([]);
 }
-  // let loc;
-
-  //    loc=[user_data.map(data=>{
-  //     if(filter_ele.includes(data.CompanyName)){
-  //       return data.Location
-  //     }
-
-  //   })]
-  //   console.log("loc",loc)
-  // }
-  // //
-  // setfilter_locations({ele:[loc]})
-  // console.log("loccc",filter_locations)
-
-  // const companyLocationMap=user_data.reduce((acc,user)=>{
-  //   const [CompanyName,Location]=user;
-  //   if(!acc[CompanyName]){
-  //     acc[CompanyName]=new Set();
-  //   }
-  //   acc[CompanyName].add(Location);
-  //   return acc;
-  // },{})
-
-  // console.log("cl",companyLocationMap)
-
-  // console.log("filter-ele", filter_ele);
+  
   function deleteUser(id) {
     // setUsers((prev) => prev.filter((_, idx) => idx !== index));
     try{
@@ -401,6 +380,7 @@ Add User
             onClick={handleLogout}
           >
             Logout
+            <HiOutlineLogout />
           </button>
 
 
@@ -430,9 +410,9 @@ Add User
                               type="checkbox"
                               name=""
                               id=""
-                              // disabled={!selectedCompanies.includes(ele)}
+                              disabled={!selectedCompanies.includes(String(ele))}
                               value={location}
-                              checked={selectedLocation.includes(location)}
+                              checked={selectedLocation.includes(location) && selectedCompanies.includes(String(ele))}
                               className="form-check-input"
                               onChange={handleLocFilter}
                             />
@@ -442,42 +422,9 @@ Add User
                   </div>
                 </li>
 
-                {/* <ul>
-              {filter_locations.map((location)=>{
-                    let locations=location.ele;
-                    locations.map((l)=>{
-                      <li>
-                        <input 
-                        type="checkbox" 
-                        name="" 
-                        id=""
-                        checked=""
-                        value={l} 
-                        />
-                      </li>
-                    }
-                    )
-                  })}
-              
-                {
-                  
-                }</ul> */}
+                
               </>
-              //   <ul class="dropdown-menu">
-              //   {uniqueCompanies.map((ele, index) => (
-              //     <li key={index} className="dropdown-item">
-              //       <label htmlFor="form-select">{ele}</label>
-              //       <input
-              //         type="checkbox"
-              //         value={ele}
-              //         name="filter_data"
-              //         checked={selectedCompanies.includes(ele)}
-              //         onChange={handleSelect}
-              //         className="form-group"
-              //       />
-              //     </li>
-              //   ))}
-              // </ul>
+              
             ))}
           </ul>
         </div>
@@ -485,15 +432,19 @@ Add User
 
         
 
-        {/* <input
+        <input
           type="text"
           className="form-control ms-4"
           placeholder="Search by Company Name or Location"
           value={searchTerm}
-          onChange={handleSearch}
+          onChange={
+            // setSearchterm(e.target.value)
+            handleSearch
+          }
           aria-label="CompanyName"
           aria-describedby="addon-wrapping"
-        /> */}
+        />
+        
       </div>
 
       <div
