@@ -158,7 +158,7 @@ app.delete('/api/auth/logout', async (req,res)=>{
 })
 
 app.get('/api/auth/check-auth',async (req,res)=>{
-    if(req.ses.id){
+    if(req.session.userId){
         res.status(200).json({"isAuthenticated":true}
         )
     }

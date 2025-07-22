@@ -45,6 +45,7 @@ function Home() {
       console.log(error)
     })
   },[isUpdated])
+  
   // let [sortConfig,SetSortConfig]=useState({key:null,direction:'asc'})
 
   function handleLogout(){
