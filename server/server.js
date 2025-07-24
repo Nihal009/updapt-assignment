@@ -8,6 +8,8 @@ const cors = require('cors');
 const session = require("express-session");
 const User = require("./models/User.model");
 const MongoStore = require('connect-mongo');
+// import isAuthenticated from "./middlewares/auth.middleware";
+
 const store=new MongoStore({
      mongoUrl:process.env.DATABASE_URL,
      collectionName:'mySessions',
@@ -40,19 +42,28 @@ console.log("db connected successfully !")).catch(()=>console.log("error connect
 const database=mongoose.Connection;
 // console.log(database)
 
+function isAuthenticated(req,res,next){
+    if(req.session.userId){
+        next()
+    }
+    else{
+        res.status(401).json({"message":"unauthorized access"})
+    }
+}
+
+
+
+
 app.get('/',(req,res)=>{
     res.send("test");
 });
 
 
-app.post('/api/addCompany',async (req,res)=>{
+app.post('/api/addCompany',isAuthenticated,async (req,res)=>{
     try{
-        if(req.session.userId){
+        
         const data= await Company.create(req.body)
         res.status(200).json(data)
-    }else{
-        res.status(401).json({"message":"unauthorized access"})
-    }
 
     }
     catch(error){
@@ -63,16 +74,13 @@ app.post('/api/addCompany',async (req,res)=>{
     
 })
 
-app.get('/api/getData',async (req,res)=>{
+app.get('/api/getData',isAuthenticated,async (req,res)=>{
 try{
-    if(req.session.userId){
+    
     const Companies=await Company.find();
     
     res.status(200).json(Companies)
-    }
-    else{
-        res.status(401).json({"message":"unauthorized access"})
-    }
+
 }
 catch(error){
 res.status(500).json({message:error.message})
@@ -80,10 +88,11 @@ res.status(500).json({message:error.message})
 
 })
 
-app.delete('/api/delete/:id',async (req,res)=>{
+app.delete('/api/delete/:id',isAuthenticated,async (req,res)=>{
     
     
-    try{const {id}=req.params;
+    try{
+        const {id}=req.params;
     const deletedCompany=await Company.findByIdAndDelete(id)
     res.status(200).json({"message":`{deletedCompany} successfully deleted`})}
     catch (error){
@@ -93,7 +102,7 @@ app.delete('/api/delete/:id',async (req,res)=>{
 })
 
 
-//login
+//auth
 
 app.post('/api/auth/login', async (req,res)=>{
     console.log("login:",req.body)
@@ -108,6 +117,10 @@ app.post('/api/auth/login', async (req,res)=>{
             return res.status(400).json({message:"Invalid password"})
         }
         req.session.userId=user._id;
+        req.session.email=user.email
+        req.session.username=user.username;
+        req.session.privileges=user.privileges
+        console.log(req.session.privilages)
         console.log("login successful")
         return res.status(200).json({message:"Login Successful",user:user.username})
     }
@@ -128,7 +141,7 @@ app.post('/api/auth/Signup', async (req,res)=>{
         }
         const hashedPassword=await bcrypt.hash(password,10);
         const user=await User.create({username:name,email:email,password:hashedPassword,})
-        req.session.userId=user._id;
+        // req.session.userId=user._id;
         res.status(201).json({message:"Account Created Successfully",user:user.username})
     }
     catch(err){
@@ -137,7 +150,7 @@ app.post('/api/auth/Signup', async (req,res)=>{
     }
 })
 
-app.delete('/api/auth/logout', async (req,res)=>{
+app.delete('/api/auth/logout',isAuthenticated, async (req,res)=>{
     if(req.session){
         req.session.destroy(err=>{
             if(err){
@@ -159,7 +172,17 @@ app.delete('/api/auth/logout', async (req,res)=>{
 
 app.get('/api/auth/check-auth',async (req,res)=>{
     if(req.session.userId){
-        res.status(200).json({"isAuthenticated":true}
+        const email=req.session.email
+        const user=await User.findOne({email})
+        // console.log(user)
+        const priv=user.privileges
+        // const priv=req.session.privileges
+        console.log(priv)
+        const dashboard=priv["dashboard"]
+        const platform=priv["platform"]
+        console.log(dashboard)
+        console.log(req.session.privileges)
+        res.status(200).json({"isAuthenticated":true,dashboard:dashboard,platform:platform}
         )
     }
     else{

@@ -8,14 +8,20 @@ import { FaTrash } from "react-icons/fa";
 import { LiaSortUpSolid,LiaSortDownSolid } from "react-icons/lia";
 import { CiSearch } from "react-icons/ci";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { HiOutlineLogout } from "react-icons/hi";
+import { data, useNavigate } from "react-router-dom";
+
 // const handleChange(form_data){
   
 // }
+import {Chart,Title, XAxis} from '@highcharts/react'
+import {Line,Bar} from '@highcharts/react/series'
+// import NavBar from "./navBar";
+
+import { text } from "@fortawesome/fontawesome-svg-core";
+
 
 function Home() {
-  const navigate=useNavigate();
+  // const navigate=useNavigate();
 
   axios.defaults.withCredentials = true
   const [isUpdated,setisUpdated]=useState(false)
@@ -39,25 +45,26 @@ function Home() {
       console.log("cleaned:",data)
       setUsers(data)
       setfilterCompanyData(data)
+      
       // updateFilter()
       
     }).catch(function(error){
       console.log(error)
     })
   },[isUpdated])
-  
+
+  // const options={
+  //   chart:{
+  //     type:'bar'
+  //   },
+  //   title:{
+  //     text:"Company Stats"
+  //   },
+  //   XAxis:{
+    
   // let [sortConfig,SetSortConfig]=useState({key:null,direction:'asc'})
 
-  function handleLogout(){
-    axios.delete("http://localhost:3000/api/auth/logout").then(
-      function(response){
-        navigate('/login')
-        console.log(response)
-      }
-    ).catch( function (response){
-      console.log(response)
-    })
-  }
+  
 
 
   const Company_data = [
@@ -90,6 +97,96 @@ function Home() {
   //selected companies
   const [selectedCompanies, setselectedCompanies] = useState([]);
   // const [companyLocationMap,setcompanyLocationMap]=useState([])
+
+
+  // const cat=filterCompanyData.map(data=>{
+  //   return data.CompanyName
+    
+  // })
+  // console.log("cat",cat)
+//   }
+// }
+// const [categories,setcategories]=useState([])
+// useEffect(()=>{
+//   if(filterCompanyData && filterCompanyData.length !==0){
+//   const cat=filterCompanyData.map(data=>{
+//     return data.CompanyName
+//   })
+//   console.log(cat)
+//   setcategories(cat)
+// }
+// },[filterCompanyData])
+
+// const optionsForLocations = {
+//   chart: {
+//     type: 'column'
+//   },
+//   title: {
+//     text: 'Company Stats Based On Location'
+//   },
+//   xAxis: {
+//     title: {
+//       text: 'Companies'
+//     },
+//     categories: uniqueCompanies
+//   },
+//   yAxis: {
+//     title: {
+//       text: 'locations'
+//     }
+//   },
+//   series: [
+//     {
+//       name: 'number of branches',
+//       data: [10, 20, 15,1]
+//     }
+//   ]
+// };
+
+// const [TotalCompanyValues,setTotalCompanyValues]=useState({})
+// useEffect(()=>{
+//   const TotalC={}
+//   user_data.forEach(data=>{
+//     if(!TotalC[data.CompanyName]){
+//       TotalC.CompanyName=0
+//     }
+//     TotalC[data.CompanyName]+=Number(data.value)
+//     console.log(TotalC)
+//   })
+//   setTotalCompanyValues(TotalC)
+// },[user_data])
+
+// console.log("t",TotalCompanyValues)
+// const optionsForValues = {
+//   chart: {
+//     type: 'column'
+//   },
+//   title: {
+//     text: 'Company Stats Based On Values'
+//   },
+//   xAxis: {
+//     title: {
+//       text: 'Companies'
+//     },
+//     categories: uniqueCompanies
+//   },
+//   yAxis: {
+//     title: {
+//       text: 'values'
+//     }
+//   },
+//   series: [
+//     {
+//       name: 'number of branches',
+//       data: [10, 20, 15,1]
+//     }
+//   ]
+// };
+
+
+
+
+
 
 
   useEffect(()=>{
@@ -134,7 +231,7 @@ function Home() {
       else{
         // console.log([...prev,value])
        
-        updatedSelected= [...prev,value]
+        updatedSelected = [...prev,value]
       }
       applyfilter(updatedSelected,selectedLocation);
       return updatedSelected
@@ -269,7 +366,8 @@ console.log("fdata",f_data)
     CompanyName: "",
     Location: "",
     IsGlobal: false,
-    id:""
+    id:"",
+    value:0
   });
 
   function handleChange(e) {
@@ -278,11 +376,18 @@ console.log("fdata",f_data)
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    
   }
   async function Add_CompanyAPI(data){
     try{
     await axios.post("http://localhost:3000/api/addCompany/",data);
     setisUpdated(true);  
+    setFormData({
+      CompanyName: '',
+      Location: '',
+      IsGlobal: false,
+      value: 0
+    });
   }
   catch (error){
     console.error("error updating the data",error);
@@ -298,7 +403,7 @@ console.log("fdata",f_data)
     e.preventDefault();
     if (form_data.CompanyName && form_data.Location) {
       Add_CompanyAPI(form_data)
-      setFormData({ CompanyName: "", Location: "", IsGlobal: false });
+      setFormData({ CompanyName: "", Location: "", IsGlobal: false,value:0 });
       // const updatedUsers = [...user_data, form_data];
       // setUsers(updatedUsers);
       // setfilterCompanyData(updatedUsers);
@@ -347,14 +452,11 @@ console.log("fdata",f_data)
   }
   return (
     <>
-      <>
-        {/* <div classNameName='addbutton' onClick={add_user()}>
-Add User
-    </div> */}
-      </>
-
+    {/* <NavBar/> */}
+     
+    {/* <NavBar/> */}
       <br />
-    
+    <div className="tracker-content">
       <div className="input-group flex-nowrap  ms-4">
         <button
           type="button"
@@ -373,15 +475,7 @@ Add User
           >
             Filter
           </button>
-          <button
-            type="button"
-            className="btn btn-danger ms-4"
-            aria-expanded="false"
-            onClick={handleLogout}
-          >
-            Logout
-            <HiOutlineLogout />
-          </button>
+          
 
 
           <ul className="dropdown-menu">
@@ -468,7 +562,9 @@ Add User
               ></button>
             </div>
             <div className="modal-body">
-              <form onSubmit={(e) => add_user(e)}>
+              <form onSubmit={(e) => add_user(e)
+        
+              }>
                 <div className="conatiner">
                   <div className="row">
                     <label htmlFor="cars">Choose Company:</label>
@@ -512,10 +608,13 @@ Add User
                         id="isGlobalcheck"
                         checked={form_data.IsGlobal}
                         onChange={handleChange}
-                        className="form-check-input"
+                        className="form-check-input mb-4"
                       />
                       Isglobal
                     </label>
+                    <label htmlFor="valueInput" className="form-label" form-check-label="true">Value:</label>
+                    <input type="number" className="form-control form-control-lg shadow-sm mb-4" name="value" id="" value={form_data.value} onChange={handleChange}/>
+                    
 
                     {/* <input type="text" name="CompanyName" id="" placeholder='Enter Company Name' value={form_data.CompanyName} onChange={handleChange}/> */}
                     {/* </div> */}
@@ -530,7 +629,7 @@ Add User
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary">
-                  Save changes
+                  Add
                 </button>
               </form>
             </div>
@@ -544,7 +643,7 @@ Add User
 <hr />
       <table className="table">
         <thead>
-          <tr>
+          <tr className="">
             <th scope="col">#</th>
             {/* <th scope="col">Id <FontAwesomeIcon icon={faSort} /></th> */}
             <th scope="col" onClick={()=>handleSort("CompanyName",CompanySortState,setCompanySortState)}>
@@ -556,6 +655,8 @@ Add User
             <th scope="col">
               IsGlobal <FontAwesomeIcon icon={faSort} />
             </th>
+            <th scope="col">Value</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -581,6 +682,10 @@ Add User
             deleteUser(index)
           }}>Delete</button>
       </td> */}
+                
+                <td>
+                {Number(user.value)}
+                </td>
                 <td>
                   <button
                     type="button"
@@ -598,11 +703,20 @@ Add User
               </tr>
             ))
           ) : (
-            <p>No data Found</p>
+            <tr>
+              <td>No data Found</td></tr>
           )}
         </tbody>
       </table>
-
+          
+      {/* <Chart>
+        <h1>Chart</h1>
+        <Line.Series data={[1,2,3,4,5]}/>
+      </Chart>
+         <Chart>
+          <Bar.Series data={[1,2,3]}
+          />
+          </Chart>  */}
       {/* <form onSubmit={(e)=>add_user(e)}>
           <input type="text" name="name" id="" placeholder='Enter Company Name' value={form_data.CompanyName} onChange={handleChange}/>
           <input type="text" name="location" id="" placeholder='Enter location' value={form_data.email} onChange={handleChange}/>
@@ -610,6 +724,9 @@ Add User
           <label for="vehicle1">Isglobal</label>
           <button type="submit">Add User</button>
         </form> */}
+        </div>
+
+        
     </>
   );
 }

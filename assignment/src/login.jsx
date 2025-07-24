@@ -1,21 +1,49 @@
 // import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import "./App.css";
 // import instance from "../axiosUrl";
 import axios from "axios";
+import { usePrivileges } from "./PrivilegeProvider";
 
 
 function Login(){
   const navigate=useNavigate();
+  axios.defaults.withCredentials = true
+  const {setPrivileges}=usePrivileges()
+  useEffect(()=>{
+    async function checkAuth() {
+      await axios.get('http://localhost:3000/api/auth/check-auth').then(function (response){
+          console.log(response)
+          const dashboard=response.data.dashboard
+              const platform=response.data.platform
+              setPrivileges({dashboard:dashboard,platform:platform})
+          if(response.status==200){
+              // const astate=response.data.isAuthenticated;
+              
+              navigate('/')
+              
+          }
+      }).catch(function (error){
+          console.log("auth check failed",error)
+          // setauthState(false)
+          navigate('/login')
+      })
+  } 
+  // setTimeout(()=>{checkAuth()},1000)
+checkAuth()
+  },[])
+
+const {setcurrUser}=usePrivileges()
+
 const [formData,setFormData]=useState({email:"",password:""})
 function handleLogin(e){
   e.preventDefault()
   axios.post('http://localhost:3000/api/auth/login',formData,{ withCredentials: true })
   .then(function (response){
     if(response.status===200 ){
-
+      setcurrUser(response.data.user)
       navigate('/')
     }
     console.log(response)

@@ -17,7 +17,12 @@ const CompanySchema=mongoose.Schema(
                 type:Boolean,
                 required:true,
                 default:false
-            }
+            },
+            value:{
+                type:Number,
+                default:0
+            },
+            
         }
 
     

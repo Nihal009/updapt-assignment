@@ -9,11 +9,12 @@ import axios from "axios";
 function SignUp(){
 
   const navigate=useNavigate();
-    const [formData,setFormData]=useState({name:"",email:"",password:""})
+    const [formData,setFormData]=useState({name:"",email:"",password:"",confirmPassword:''})
 
 async function handleSignup(e){
   e.preventDefault()
   console.log("form",formData)
+  if(formData.password===formData.confirmPassword){
 await axios.post('http://localhost:3000/api/auth/Signup',formData,{
   withCredentials: true
 })
@@ -25,7 +26,10 @@ await axios.post('http://localhost:3000/api/auth/Signup',formData,{
 .catch(function (response){
   console.log(response)
 })
-
+}
+else{
+  console.log("password mismatch")
+}
 }
 
 
@@ -61,6 +65,12 @@ return (<>
                   <div className="form-floating mb-3">
                     <input type="password" className="form-control" name="password" id="password" value={formData.password} placeholder="Password" onChange={(e)=>setFormData({...formData,password:e.target.value})} required/>
                     <label for="password" className="form-label">Password</label>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="form-floating mb-3">
+                    <input type="password" className="form-control" name="password" id="password" value={formData.confirmPassword} placeholder="Password" onChange={(e)=>setFormData({...formData,confirmPassword:e.target.value})} required/>
+                    <label for="password" className="form-label">Confirm Password</label>
                   </div>
                 </div>
                 <div className="col-12">
