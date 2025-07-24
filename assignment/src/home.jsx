@@ -457,7 +457,7 @@ console.log("fdata",f_data)
     {/* <NavBar/> */}
       <br />
     <div className="tracker-content">
-      <div className="input-group flex-nowrap  ms-4">
+      <div className="input-group flex-nowrap ms-4 gap-4">
         <button
           type="button"
           className="btn btn-primary"

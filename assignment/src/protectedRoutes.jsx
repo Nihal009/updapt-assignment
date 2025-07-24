@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet,Navigate } from "react-router-dom";
+import { Outlet,Navigate,useLocation } from "react-router-dom";
 import axios from "axios";
 import {BeatLoader}from "react-spinners"
 import { usePrivileges } from "./PrivilegeProvider";
@@ -9,7 +9,8 @@ axios.defaults.withCredentials = true
 
 const ProtectedRoutes=()=>{
     const [authState,setauthState]=useState(null)
-    const {privileges,setPrivileges}=usePrivileges()
+    const {setcurrUser,privileges,setPrivileges}=usePrivileges()
+    const location=useLocation()
     useEffect(()=>{
         console.log("entered auth check")
         async function checkAuth() {
@@ -19,6 +20,9 @@ const ProtectedRoutes=()=>{
                     const astate=response.data.isAuthenticated;
                     const dashboard=response.data.dashboard
                     const platform=response.data.platform
+                    const user=response.data.name
+                    console.log("user",user)
+                    setcurrUser(user)
                     setPrivileges({dashboard:dashboard,platform:platform})
                     console.log("admin",dashboard)
                     console.log("auth:",astate)
@@ -30,7 +34,7 @@ const ProtectedRoutes=()=>{
 
             })
         } 
-        setTimeout(()=>{checkAuth()},1000)
+        setTimeout(()=>{checkAuth()},500)
     },[])
     if(authState===null){
         return <><BeatLoader cssOverride={{
@@ -40,11 +44,25 @@ const ProtectedRoutes=()=>{
             "height": "100vh"
           }}/></>
     }
+    if(!authState){
+       return <Navigate to='/login'/>
+    }
+    const pathname=location.pathname;
+
+    if(pathname==="/dashboard" && !privileges.dashboard){
+       return <Navigate to='/'/>
+    }
+    if(pathname==="/tracker" && !privileges.platform){
+       return <Navigate to='/'/>
+    }
+    return <Outlet/>
+    
+
     // const [cookies]=useCookies("connect.sid")
     // const sessionId=cookies["connect.sid"]
     // console.log(sessionId)
     
-    return authState ? <Outlet/> :<Navigate to='/login'/>
+    // return authState ? <Outlet/> :<Navigate to='/login'/>
 }
 
 export default ProtectedRoutes;

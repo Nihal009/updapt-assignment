@@ -3,15 +3,18 @@ import NavBar from './navBar.jsx';
 import { usePrivileges } from './PrivilegeProvider.jsx';
 
 function Layout(){
-const {privileges}=usePrivileges()
+const {currUser,privileges}=usePrivileges()
 
 return(
 <>
 
 <NavBar/>
-{privileges.platform?<div>
- <Outlet    />   
-</div>:''}
+
+{privileges.platform&&<div>
+ <Outlet    />
+ <div>
+ welcome Back {currUser}</div>
+</div>}
 
 </>
 

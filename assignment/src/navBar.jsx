@@ -35,7 +35,7 @@ return(
             </li>}
             {privileges.platform&&<li className="nav-item">
               
-              <Link to={"/"}>
+              <Link to={"/tracker"}>
               Tracker
               </Link>
           </li>}

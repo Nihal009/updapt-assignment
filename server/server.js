@@ -8,7 +8,9 @@ const cors = require('cors');
 const session = require("express-session");
 const User = require("./models/User.model");
 const MongoStore = require('connect-mongo');
+const isAuthenticated  = require("./middlewares/auth.middleware");
 // import isAuthenticated from "./middlewares/auth.middleware";
+
 
 const store=new MongoStore({
      mongoUrl:process.env.DATABASE_URL,
@@ -42,14 +44,7 @@ console.log("db connected successfully !")).catch(()=>console.log("error connect
 const database=mongoose.Connection;
 // console.log(database)
 
-function isAuthenticated(req,res,next){
-    if(req.session.userId){
-        next()
-    }
-    else{
-        res.status(401).json({"message":"unauthorized access"})
-    }
-}
+
 
 
 
@@ -176,13 +171,15 @@ app.get('/api/auth/check-auth',async (req,res)=>{
         const user=await User.findOne({email})
         // console.log(user)
         const priv=user.privileges
+        const username=req.session.username
+        console.log(username)
         // const priv=req.session.privileges
         console.log(priv)
         const dashboard=priv["dashboard"]
         const platform=priv["platform"]
         console.log(dashboard)
         console.log(req.session.privileges)
-        res.status(200).json({"isAuthenticated":true,dashboard:dashboard,platform:platform}
+        res.status(200).json({"isAuthenticated":true,dashboard:dashboard,platform:platform,name:username}
         )
     }
     else{
