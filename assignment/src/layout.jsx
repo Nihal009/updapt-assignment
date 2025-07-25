@@ -5,16 +5,22 @@ import { usePrivileges } from './PrivilegeProvider.jsx';
 function Layout(){
 const {currUser,privileges}=usePrivileges()
 
+
+
 return(
 <>
 
 <NavBar/>
+{location.pathname === '/' && (
+        <div className="container mt-4">
+          <h2 className="text-center">Welcome Back, {currUser}!</h2>
+        </div>
+      )}
 
-{privileges.platform&&<div>
+<div>
  <Outlet    />
- <div>
- welcome Back {currUser}</div>
-</div>}
+ 
+</div>
 
 </>
 

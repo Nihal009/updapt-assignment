@@ -8,17 +8,23 @@ import { FaChartBar,FaChartLine } from "react-icons/fa";
 
 const Dashboard = () => {
     const [GraphType,setGraphType]=useState("column")
+    // const [renderState,setrenderState]=useState(false)
     const [CompanyData,setCompanyData]=useState([])
     axios.defaults.withCredentials = true
     useEffect(()=>{
-        axios.get("http://localhost:3000/api/getData").then(function (response){
+        axios.get("http://localhost:3000/api/getDashboardData").then(function (response){
           console.log("response from server:",response.data)
           const data=response.data
           setCompanyData(data)
+          
         }).catch(function(error){
           console.log(error)
+          // setrenderState(false)
         })
       },[])
+
+
+
 const LocData={}
 const Locations=[]
 const CList={}

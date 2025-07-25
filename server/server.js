@@ -9,6 +9,7 @@ const session = require("express-session");
 const User = require("./models/User.model");
 const MongoStore = require('connect-mongo');
 const isAuthenticated  = require("./middlewares/auth.middleware");
+const {DashBoardAccess,PlatformAccess} = require("./middlewares/priv.middleware");
 // import isAuthenticated from "./middlewares/auth.middleware";
 
 
@@ -17,12 +18,12 @@ const store=new MongoStore({
      collectionName:'mySessions',
      expires:1000*60*60*24
       })
-app.use(cors(
-    {
-    origin: 'http://localhost:5173', 
-    credentials: true
-}
-))
+app.use(cors())
+//     {
+//     origin: 'http://localhost:5173', 
+//     credentials: true
+// }
+// ))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
@@ -48,13 +49,12 @@ const database=mongoose.Connection;
 
 
 
-
 app.get('/',(req,res)=>{
     res.send("test");
 });
 
 
-app.post('/api/addCompany',isAuthenticated,async (req,res)=>{
+app.post('/api/addCompany',isAuthenticated,PlatformAccess,async (req,res)=>{
     try{
         
         const data= await Company.create(req.body)
@@ -69,7 +69,21 @@ app.post('/api/addCompany',isAuthenticated,async (req,res)=>{
     
 })
 
-app.get('/api/getData',isAuthenticated,async (req,res)=>{
+app.get('/api/getDashboardData',isAuthenticated,DashBoardAccess,async (req,res)=>{
+    try{
+        
+        const Companies=await Company.find();
+        
+        res.status(200).json(Companies)
+    
+    }
+    catch(error){
+    res.status(500).json({message:error.message})
+    }
+    
+    })
+
+app.get('/api/getData',isAuthenticated,PlatformAccess,async (req,res)=>{
 try{
     
     const Companies=await Company.find();
@@ -83,7 +97,7 @@ res.status(500).json({message:error.message})
 
 })
 
-app.delete('/api/delete/:id',isAuthenticated,async (req,res)=>{
+app.delete('/api/delete/:id',isAuthenticated,PlatformAccess,async (req,res)=>{
     
     
     try{
@@ -111,13 +125,14 @@ app.post('/api/auth/login', async (req,res)=>{
         if(!ismatch){
             return res.status(400).json({message:"Invalid password"})
         }
+        const priv=user.privileges
         req.session.userId=user._id;
         req.session.email=user.email
         req.session.username=user.username;
         req.session.privileges=user.privileges
         console.log(req.session.privilages)
         console.log("login successful")
-        return res.status(200).json({message:"Login Successful",user:user.username})
+        return res.status(200).json({message:"Login Successful",user:user.username,privileges:priv})
     }
     catch (error){
         res.status(500).json({error:"Login failed"
@@ -166,7 +181,11 @@ app.delete('/api/auth/logout',isAuthenticated, async (req,res)=>{
 })
 
 app.get('/api/auth/check-auth',async (req,res)=>{
-    if(req.session.userId){
+    const _id=req.sessionID
+    const session=await mongoose.connection.collection("mySessions").findOne({_id:_id})
+    // console.log(session)
+    if(session){
+        // console.log(req.sessionID)
         const email=req.session.email
         const user=await User.findOne({email})
         // console.log(user)

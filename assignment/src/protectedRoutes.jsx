@@ -36,6 +36,8 @@ const ProtectedRoutes=()=>{
         } 
         setTimeout(()=>{checkAuth()},500)
     },[])
+
+
     if(authState===null){
         return <><BeatLoader cssOverride={{
             "display": "flex",

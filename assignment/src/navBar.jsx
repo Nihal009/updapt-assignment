@@ -5,6 +5,8 @@ import "./App.css";
 import axios from "axios";
 import { useState } from "react";
 import { usePrivileges } from "./PrivilegeProvider";
+import { PiUserCircleThin } from "react-icons/pi";
+import { color } from "highcharts";
 
 function NavBar(){
   axios.defaults.withCredentials = true
@@ -29,7 +31,10 @@ return(
         
 
         <ul className="navbar-nav d-flex flex-row gap-4 mb-0">
-            <h1 className="mb-0">{currUser}</h1>
+        <li className="nav-item d-flex align-items-center gap-2">
+    <PiUserCircleThin style={{ color: "white" }} className="fs-4"/>
+    <h1 className="h5 mb-0">{currUser}</h1>
+  </li>
             {privileges.dashboard && <li className="nav-item">
                 <Link to={"/dashboard"} >DashBoard</Link>
             </li>}
